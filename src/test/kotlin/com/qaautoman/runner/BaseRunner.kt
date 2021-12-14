@@ -46,28 +46,31 @@ open class BaseRunner : AbstractTestNGCucumberTests() {
     }
     @AfterMethod
     open fun tearDown(result: ITestResult) {
-        // Here will compare if test is failing then only it will enter into if condition
-        val screenshot = File("screenshots" + File.separator + System.currentTimeMillis()
-            .toString() + "_" + result.name.toString() + ".jpg")
-        if (!screenshot.exists()) {
-            File(screenshot.getParent()).mkdirs()
-            try {
-                screenshot.createNewFile()
-                println("Screenshot Taken")
-            } catch (e: IOException) {
-                e.printStackTrace()
+        if(ITestResult.FAILURE == result.status){
+            // Here will compare if test is failing then only it will enter into if condition
+            val screenshot = File("screenshots" + File.separator + System.currentTimeMillis()
+                .toString() + "_" + result.name.toString() + ".jpg")
+            if (!screenshot.exists()) {
+                File(screenshot.getParent()).mkdirs()
+                try {
+                    screenshot.createNewFile()
+                    println("Screenshot Taken")
+                } catch (e: IOException) {
+                    e.printStackTrace()
+                }
             }
+            try {
+                val ts = WebDriverManager.instance.getDriver() as TakesScreenshot
+                val source: File = ts.getScreenshotAs(OutputType.FILE)
+            } catch (e: Exception) {
+                println("Exception while taking screenshot " + e.message)
+            }
+            System.out.println("Written screenshot to " + screenshot.getAbsolutePath())
         }
-        try {
-            val ts = WebDriverManager.instance.getDriver() as TakesScreenshot
-            val source: File = ts.getScreenshotAs(OutputType.FILE)
-        } catch (e: Exception) {
-            println("Exception while taking screenshot " + e.message)
-        }
-        System.out.println("Written screenshot to " + screenshot.getAbsolutePath())
         //System.out.println("-------------------------------IN TEAR SOWN--------------------------------------------------n");
         WebDriverManager.instance.quit()
         //System.out.println("-------------------------------INIT--------------------------------------------------n");
     }
 
-}
+
+    }

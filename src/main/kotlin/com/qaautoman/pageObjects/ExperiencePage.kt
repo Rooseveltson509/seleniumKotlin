@@ -1,11 +1,13 @@
 package com.qaautoman.pageObjects
 
 import org.openqa.selenium.By
+import org.openqa.selenium.JavascriptExecutor
 import org.openqa.selenium.WebElement
 import org.openqa.selenium.support.FindAll
 import org.openqa.selenium.support.FindBy
 import org.openqa.selenium.support.ui.ExpectedConditions
 import java.time.LocalDateTime
+
 
 class ExperiencePage : Page() {
 
@@ -15,21 +17,44 @@ class ExperiencePage : Page() {
     @FindBy(className = "_rj7nx")
     var nearby: WebElement? = null
 
-    @FindAll(FindBy(css = "_cvkwaj"))
-    private var tableCalendar: WebElement? = null
+    @FindAll(FindBy(css = "div[data-testid='menuItemButton-experiences_guest_picker'] > ._1wp3mhe > ._w37zq5"))
+    private var experiencesGuestPicker: WebElement? = null
 
-    @FindBy(css = "li[role='option']")
-    var adressSuggestedList: List<WebElement>? = null
+    @FindAll(FindBy(css = "div[data-testid='menuItemButton-price_range'] > ._1wp3mhe"))
+    private var priceRange: WebElement? = null
 
-    @FindBy(className = "_37ivfdq")
-    var guestsBtn: WebElement? = null
+    @FindAll(FindBy(css = "button[data-testid='filterItem-experiences_guest_picker-stepper-adults-0-increase-button']"))
+    private var increaseBtnAdults: WebElement? = null
+
+    @FindAll(FindBy(css = "button[data-testid='filterItem-experiences_guest_picker-stepper-children-0-increase-button']"))
+    private var increaseBtnChildren: WebElement? = null
+
+    @FindAll(FindBy(css = "button[data-testid='filterItem-experiences_guest_picker-stepper-infants-0-increase-button']"))
+    private var increaseBtnInfants: WebElement? = null
+
+    @FindAll(FindBy(css = "span[data-testid='filterItem-experiences_guest_picker-stepper-adults-0-value']"))
+    private var initialValueGuestAdults: WebElement? = null
+
+    @FindAll(FindBy(css = "span[data-testid='filterItem-experiences_guest_picker-stepper-children-0-value']"))
+    private var initialValueGuestChildrenn: WebElement? = null
+
+    @FindAll(FindBy(css = "span[data-testid='filterItem-experiences_guest_picker-stepper-infants-0-value']"))
+    private var initialValueGuestInfants: WebElement? = null
+
+    @FindBy(css = "button[data-testid='filter-panel-save-button']")
+    private var btnSave: WebElement? = null
+
+    @FindBy(css = "button[data-testid='filter-panel-save-button']")
+    private var btnSavedPrice: WebElement? = null
+
+    @FindBy(css = "#price_filter_min")
+    private var btnPriceFilterMinus: WebElement? = null
+
+    @FindBy(css = "#price_filter_max")
+    private var btnPriceFilterPlus: WebElement? = null
 
     @FindBy(css = "#bigsearch-query-location-input")
     var whereAreYouGoing: WebElement? = null
-
-
-
-
 
 
     @FindBy(className = "_m9v25n")
@@ -52,6 +77,7 @@ class ExperiencePage : Page() {
             clickOn(acceptBtn!!)
         }
     }
+
     @Throws(InterruptedException::class)
     fun setExperience() {
         wait.until(ExpectedConditions.visibilityOf(experienceBtn))
@@ -60,8 +86,6 @@ class ExperiencePage : Page() {
         whereAreYouGoing!!.click()
         wait.until(ExpectedConditions.visibilityOf(nearby))
         nearby!!.click()
-        //tableCalendar?.findElements()
-
 
         val allDates = driver.findElements(By.xpath("//table[@class='_cvkwaj']//td"))
         // now get datetime
@@ -89,9 +113,44 @@ class ExperiencePage : Page() {
             }
         }
         searchBtn?.click()
-        Thread.sleep(5000)
+        this.chooseGuest()
 
     }
 
+    private fun chooseGuest() {
+        Thread.sleep(5000)
+        experiencesGuestPicker?.click()
+        Thread.sleep(3000)
+        println(initialValueGuestAdults?.text)
+
+        if (waitUntil { ExpectedConditions.visibilityOf(initialValueGuestAdults) }) {
+            if (initialValueGuestAdults?.text == "0") {
+                increaseBtnAdults?.click()
+            }
+        }
+
+        if (waitUntil { ExpectedConditions.visibilityOf(initialValueGuestChildrenn) }) {
+            if (initialValueGuestChildrenn?.text == "0") {
+                increaseBtnChildren?.click()
+            }
+        }
+
+        if (waitUntil { ExpectedConditions.visibilityOf(initialValueGuestInfants) }) {
+            if (initialValueGuestInfants?.text == "0") {
+                increaseBtnInfants?.click()
+            }
+        }
+        btnSave?.click()
+        priceRange?.click()
+        Thread.sleep(3000)
+        val j = driver as JavascriptExecutor
+
+        wait.until(ExpectedConditions.visibilityOf(btnPriceFilterMinus))
+        j.executeScript("arguments[0].value='50';", btnPriceFilterMinus)
+
+        wait.until(ExpectedConditions.visibilityOf(btnPriceFilterPlus))
+        j.executeScript("arguments[0].value='100';", btnPriceFilterPlus)
+        btnSavedPrice?.click()
+    }
 
 }
